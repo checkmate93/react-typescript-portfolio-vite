@@ -375,13 +375,19 @@ function ContactPage() {
     setFormStatus("sending");
 
     try {
-      await emailjs.sendForm(serviceId, templateId, formRef.current, { publicKey });
-      event.currentTarget.reset();
-      setFormStatus("sent");
-    } catch (error) {
-      console.error("EmailJS failed", error);
-      setFormStatus("error");
-    }
+  // 1. Στέλνεις τη φόρμα χρησιμοποιώντας το ref
+  await emailjs.sendForm(serviceId, templateId, formRef.current!, { publicKey });
+
+  // 2. Καθαρίζεις τη φόρμα χρησιμοποιώντας το ref αντί για το event
+  // Χρησιμοποιούμε το optional chaining (?.) για σιγουριά
+  formRef.current?.reset();
+
+  // 3. Ενημερώνεις το status σε επιτυχία
+  setFormStatus("sent");
+} catch (error) {
+  console.error("EmailJS failed", error);
+  setFormStatus("error");
+}
   }
 
   return (
