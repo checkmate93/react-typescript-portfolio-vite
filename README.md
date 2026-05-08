@@ -19,15 +19,6 @@ npm install
 npm run dev
 ```
 
-## EmailJS Setup
-
-Create an EmailJS service and template, then copy `.env.example` to `.env.local`.
-
-```bash
-VITE_EMAILJS_SERVICE_ID=your_service_id
-VITE_EMAILJS_TEMPLATE_ID=your_template_id
-VITE_EMAILJS_PUBLIC_KEY=your_public_key
-```
 
 Use these template variables in EmailJS: `user_name`, `user_email`, `project_type`, `message`, and `to_name`.
 
