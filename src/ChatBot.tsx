@@ -10,9 +10,9 @@ export default function ChatBot() {
   const sendMessage = async () => {
     if (!msg.trim()) return;
     
-    const currentMsg = msg; // Κρατάμε το μήνυμα
+    const currentMsg = msg;
     setReply("Σκέφτομαι...");
-    setMsg(""); // Καθαρίζουμε το input αμέσως
+    setMsg("");
 
     const API_URL = "https://bro-project.onrender.com";
     
@@ -22,6 +22,7 @@ export default function ChatBot() {
         headers: { 
           "Content-Type": "application/json" 
         },
+        // Εδώ χρησιμοποιούμε "messages" όπως ζητάει το backend σου
         body: JSON.stringify({ messages: currentMsg }),
       });
 
