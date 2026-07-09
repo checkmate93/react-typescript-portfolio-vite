@@ -5,34 +5,62 @@ import { faComments, faPaperPlane, faXmark } from "@fortawesome/free-solid-svg-i
 export default function ChatBot() {
   const [isOpen, setIsOpen] = useState(false);
   const [msg, setMsg] = useState("");
-  const [reply, setReply] = useState("");
+  const [reply, setReply] = useState("Hello! How can I help you?");
 
   const sendMessage = async () => {
-    const API_URL = import.meta.env.VITE_PUBLIC_API_URL || "https://bro-project.onrender.com";
-    const res = await fetch(`${API_URL}/chat`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: msg }),
-    });
-    const data = await res.json();
-    setReply(data.response);
+    if (!msg.trim()) return;
+    setReply("Thinking...");
+    
+    // Το endpoint σου
+    const API_URL = "https://bro-project.onrender.com";
+    
+    try {
+      const res = await fetch(`${API_URL}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: msg }),
+      });
+      const data = await res.json();
+      setReply(data.response || "No response from server.");
+    } catch (error) {
+      setReply("Error connecting to server.");
+    }
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed bottom-6 right-6 z-[9999]">
       {!isOpen ? (
-        <button onClick={() => setIsOpen(true)} className="bg-cyan-600 text-white p-4 rounded-full shadow-lg">
-          <FontAwesomeIcon icon={faComments} />
+        <button 
+          onClick={() => setIsOpen(true)} 
+          className="bg-cyan-600 text-white p-4 rounded-full shadow-2xl hover:bg-cyan-700 transition"
+        >
+          <FontAwesomeIcon icon={faComments} size="lg" />
         </button>
       ) : (
-        <div className="bg-white p-4 rounded-xl shadow-2xl w-72 border border-slate-200">
-          <div className="flex justify-between mb-2">
-            <h3 className="font-bold">Chat</h3>
-            <button onClick={() => setIsOpen(false)}><FontAwesomeIcon icon={faXmark} /></button>
+        <div className="bg-white p-5 rounded-2xl shadow-2xl w-80 border border-slate-200 animate-in fade-in zoom-in duration-300">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-bold text-lg">AI Assistant</h3>
+            <button onClick={() => setIsOpen(false)} className="text-gray-500 hover:text-black">
+              <FontAwesomeIcon icon={faXmark} />
+            </button>
           </div>
-          <input className="w-full border p-2 rounded mb-2" value={msg} onChange={(e) => setMsg(e.target.value)} placeholder="Type..." />
-          <button onClick={sendMessage} className="w-full bg-slate-900 text-white p-2 rounded">Send</button>
-          {reply && <p className="mt-2 text-sm bg-gray-100 p-2 rounded">{reply}</p>}
+          <div className="bg-slate-50 p-3 rounded-lg mb-4 h-32 overflow-y-auto text-sm text-slate-700">
+            {reply}
+          </div>
+          <div className="flex gap-2">
+            <input 
+              className="flex-1 border p-2 rounded-lg text-sm outline-none focus:border-cyan-500" 
+              value={msg} 
+              onChange={(e) => setMsg(e.target.value)} 
+              placeholder="Ask anything..." 
+            />
+            <button 
+              onClick={sendMessage} 
+              className="bg-slate-900 text-white px-4 py-2 rounded-lg hover:bg-slate-800"
+            >
+              <FontAwesomeIcon icon={faPaperPlane} />
+            </button>
+          </div>
         </div>
       )}
     </div>
