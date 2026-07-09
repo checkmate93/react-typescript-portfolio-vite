@@ -581,6 +581,7 @@ export default function App() {
     <BrowserRouter>
       <ScrollToTop />
       <Layout />
+      <ChatBot />
     </BrowserRouter>
   );
 }
