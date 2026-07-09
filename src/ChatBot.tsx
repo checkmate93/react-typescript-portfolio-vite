@@ -22,7 +22,7 @@ export default function ChatBot() {
         headers: { 
           "Content-Type": "application/json" 
         },
-        body: JSON.stringify({ message: currentMsg }),
+        body: JSON.stringify({ messages: currentMsg }),
       });
 
       if (!res.ok) {
