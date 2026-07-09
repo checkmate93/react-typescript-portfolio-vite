@@ -1,3 +1,4 @@
+import ChatBot from "./ChatBot";
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import { BrowserRouter, Link, NavLink, Route, Routes, useLocation } from "react-router-dom";
 import emailjs from "@emailjs/browser";
