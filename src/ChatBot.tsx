@@ -1,3 +1,4 @@
+import { useState, useRef, useEffect } from "react";
 export default function ChatBot() {
   const [isOpen, setIsOpen] = useState(false);
   const [msg, setMsg] = useState("");
