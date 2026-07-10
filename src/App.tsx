@@ -1,4 +1,4 @@
-import ChatBot from "./ChatBot";
+import LiveChat from "./LiveChat";
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import { BrowserRouter, Link, NavLink, Route, Routes, useLocation } from "react-router-dom";
 import emailjs from "@emailjs/browser";
@@ -582,7 +582,7 @@ export default function App() {
     <BrowserRouter>
       <ScrollToTop />
       <Layout />
-      <ChatBot />
+      <LiveChat/>
     </BrowserRouter>
   );
 }
