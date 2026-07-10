@@ -19,7 +19,7 @@ export default function ChatBot() {
     if (!msg.trim()) return;
     
     const currentMsg = msg;
-    setReply(""); // Καθαρίζουμε την προηγούμενη απάντηση
+    setReply(""); 
     setMsg("");
 
     try {
@@ -37,10 +37,14 @@ export default function ChatBot() {
         const { done, value } = await reader.read();
         if (done) break;
         
-        fullReply += decoder.decode(value, { stream: true });
+        const chunk = decoder.decode(value, { stream: true });
+        
+        // Αντί για loop με delay που "παγώνει" το UI, προσθέτουμε το κομμάτι άμεσα
+        // και η αίσθηση του αργού streaming γίνεται από το backend ή οπτικά
+        fullReply += chunk;
         setReply(fullReply);
         
-        // Μικρό pause για ομαλό streaming
+        // Μικρό pause για να φαίνεται ομαλό
         await new Promise(resolve => setTimeout(resolve, 15));
       }
     } catch (error) {
@@ -72,8 +76,7 @@ export default function ChatBot() {
           </div>
           
           {/* Messages Container */}
-          {/* Σημαντικό: whitespace-pre-wrap για σωστή εμφάνιση των αλλαγών γραμμής */}
-          <div ref={scrollRef} className="flex-1 p-6 overflow-y-auto bg-white text-slate-700 leading-relaxed whitespace-pre-wrap">
+          <div ref={scrollRef} className="flex-1 p-6 overflow-y-auto bg-white text-slate-700 leading-relaxed prose prose-sm max-w-none">
             {reply ? (
               <div className="animate-in fade-in duration-700">{reply}</div>
             ) : (
