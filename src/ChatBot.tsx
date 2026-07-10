@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faComments, faPaperPlane, faXmark, faRobot } from "@fortawesome/free-solid-svg-icons";
 
@@ -6,9 +6,14 @@ export default function ChatBot() {
   const [isOpen, setIsOpen] = useState(false);
   const [msg, setMsg] = useState("");
   const [reply, setReply] = useState("Γεια σας! Πώς μπορώ να βοηθήσω σήμερα;");
+  const scrollRef = useRef(null);
 
-  // Helper για καθυστέρηση στο streaming
-  const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+  // Αυτόματο scroll στο κάτω μέρος όταν αλλάζει το reply
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [reply]);
 
   const sendMessage = async () => {
     if (!msg.trim()) return;
@@ -17,16 +22,12 @@ export default function ChatBot() {
     setReply(""); 
     setMsg("");
 
-    const API_URL = "https://bro-project.onrender.com";
-    
     try {
-      const res = await fetch(`${API_URL}/chat`, {
+      const res = await fetch("https://bro-project.onrender.com/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: [{ role: "user", content: currentMsg }] }),
       });
-
-      if (!res.ok) throw new Error("Σφάλμα σύνδεσης");
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
@@ -38,60 +39,68 @@ export default function ChatBot() {
         
         const chunk = decoder.decode(value, { stream: true });
         
-        // "Σπάμε" το string σε χαρακτήρες για πιο ομαλό, αργό εφέ
-        for (let char of chunk) {
-          fullReply += char;
-          setReply(fullReply);
-          await delay(20); // Ρυθμίστε αυτό το νούμερο για ταχύτητα (π.χ. 10=γρήγορο, 50=αργό)
-        }
+        // Αντί για loop με delay που "παγώνει" το UI, προσθέτουμε το κομμάτι άμεσα
+        // και η αίσθηση του αργού streaming γίνεται από το backend ή οπτικά
+        fullReply += chunk;
+        setReply(fullReply);
+        
+        // Μικρό pause για να φαίνεται ομαλό
+        await new Promise(resolve => setTimeout(resolve, 15));
       }
     } catch (error) {
-      setReply("Λυπάμαι, υπήρξε κάποιο τεχνικό πρόβλημα. Παρακαλώ προσπαθήστε ξανά αργότερα.");
+      setReply("Σφάλμα σύνδεσης. Παρακαλώ δοκιμάστε ξανά.");
     }
   };
 
   return (
-    <div className="fixed bottom-8 right-8 z-[9999]">
+    <div className="fixed bottom-8 right-8 z-[9999] font-sans">
       {!isOpen ? (
         <button 
           onClick={() => setIsOpen(true)} 
-          className="bg-slate-900 text-white p-5 rounded-2xl shadow-xl hover:scale-105 transition-all duration-300"
+          className="bg-slate-900 text-white p-5 rounded-full shadow-2xl hover:scale-110 transition-transform duration-300 border-2 border-white"
         >
           <FontAwesomeIcon icon={faComments} size="xl" />
         </button>
       ) : (
-        <div className="bg-white rounded-3xl shadow-2xl w-96 border border-slate-200 overflow-hidden animate-in fade-in zoom-in duration-300">
+        <div className="bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] w-[380px] h-[500px] flex flex-col border border-slate-100 overflow-hidden animate-in slide-in-from-bottom-10 duration-500">
+          
           {/* Header */}
-          <div className="bg-slate-900 p-6 text-white flex justify-between items-center">
+          <div className="bg-slate-900 p-5 text-white flex justify-between items-center shadow-md">
             <div className="flex items-center gap-3">
-              <FontAwesomeIcon icon={faRobot} className="text-cyan-400" />
-              <h3 className="font-semibold text-lg">AI Support Assistant</h3>
+              <div className="bg-cyan-500 p-2 rounded-lg"><FontAwesomeIcon icon={faRobot} /></div>
+              <span className="font-bold tracking-wide">AI Assistant</span>
             </div>
             <button onClick={() => setIsOpen(false)} className="hover:text-cyan-400 transition">
               <FontAwesomeIcon icon={faXmark} />
             </button>
           </div>
           
-          {/* Body */}
-          <div className="p-6 h-80 overflow-y-auto text-slate-700 leading-relaxed whitespace-pre-wrap bg-slate-50">
-            {reply || <span className="text-slate-400 italic">Γράφει...</span>}
+          {/* Messages Container */}
+          <div ref={scrollRef} className="flex-1 p-6 overflow-y-auto bg-white text-slate-700 leading-relaxed prose prose-sm max-w-none">
+            {reply ? (
+              <div className="animate-in fade-in duration-700">{reply}</div>
+            ) : (
+              <div className="text-slate-400 animate-pulse italic">Σκέφτομαι...</div>
+            )}
           </div>
           
-          {/* Footer Input */}
-          <div className="p-4 border-t border-slate-100 flex gap-2">
-            <input 
-              className="flex-1 border border-slate-200 p-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-cyan-500 transition" 
-              value={msg} 
-              onChange={(e) => setMsg(e.target.value)} 
-              onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-              placeholder="Γράψτε την ερώτησή σας..." 
-            />
-            <button 
-              onClick={sendMessage} 
-              className="bg-cyan-600 text-white px-5 py-3 rounded-xl hover:bg-cyan-700 transition font-bold"
-            >
-              <FontAwesomeIcon icon={faPaperPlane} />
-            </button>
+          {/* Input Area */}
+          <div className="p-4 bg-slate-50 border-t border-slate-200">
+            <div className="flex gap-2 bg-white p-1 rounded-xl border border-slate-200 focus-within:ring-2 focus-within:ring-cyan-500 transition">
+              <input 
+                className="flex-1 px-3 py-2 text-sm outline-none bg-transparent" 
+                value={msg} 
+                onChange={(e) => setMsg(e.target.value)} 
+                onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                placeholder="Γράψε ένα μήνυμα..." 
+              />
+              <button 
+                onClick={sendMessage} 
+                className="bg-slate-900 text-white px-4 py-2 rounded-lg hover:bg-cyan-600 transition"
+              >
+                <FontAwesomeIcon icon={faPaperPlane} />
+              </button>
+            </div>
           </div>
         </div>
       )}
