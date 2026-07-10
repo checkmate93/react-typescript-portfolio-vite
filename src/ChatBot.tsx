@@ -1,32 +1,21 @@
-import { useState, useRef, useEffect } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faComments, faPaperPlane, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { useState } from "react";
 
 export default function ChatBot() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div style={{ position: "fixed", bottom: "30px", right: "30px", zIndex: 99999 }}>
-      {/* Το κουμπί που ανοίγει το chat */}
+    <div style={{ position: "fixed", bottom: "20px", right: "20px", zIndex: 999999 }}>
       {!isOpen ? (
         <button 
           onClick={() => setIsOpen(true)}
-          style={{ width: "60px", height: "60px", borderRadius: "50%", background: "#0f172a", color: "white", border: "none", cursor: "pointer", boxShadow: "0 4px 15px rgba(0,0,0,0.3)" }}
+          style={{ padding: "15px 25px", background: "black", color: "white", borderRadius: "20px", cursor: "pointer" }}
         >
-          <FontAwesomeIcon icon={faComments} size="lg" />
+          Chat
         </button>
       ) : (
-        /* Το παράθυρο του chat */
-        <div style={{ width: "300px", height: "400px", background: "white", borderRadius: "20px", boxShadow: "0 10px 25px rgba(0,0,0,0.2)", display: "flex", flexDirection: "column", overflow: "hidden" }}>
-          <div style={{ background: "#0f172a", color: "white", padding: "15px", display: "flex", justifyContent: "space-between" }}>
-            <span>AI Assistant</span>
-            <button onClick={() => setIsOpen(false)} style={{ background: "none", border: "none", color: "white", cursor: "pointer" }}>
-              <FontAwesomeIcon icon={faXmark} />
-            </button>
-          </div>
-          <div style={{ flex: 1, padding: "15px", overflowY: "auto" }}>
-            <p>Γεια σας! Πώς μπορώ να βοηθήσω;</p>
-          </div>
+        <div style={{ width: "250px", height: "300px", background: "white", border: "2px solid black", padding: "10px" }}>
+          <p>Το Chatbot λειτουργεί!</p>
+          <button onClick={() => setIsOpen(false)}>Κλείσιμο</button>
         </div>
       )}
     </div>
