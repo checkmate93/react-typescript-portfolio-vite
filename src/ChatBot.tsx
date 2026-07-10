@@ -8,7 +8,6 @@ export default function ChatBot() {
   const [reply, setReply] = useState("Γεια σας! Πώς μπορώ να βοηθήσω σήμερα;");
   const scrollRef = useRef(null);
 
-  // Αυτόματο scroll στο κάτω μέρος όταν αλλάζει το reply
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -25,9 +24,22 @@ export default function ChatBot() {
     try {
       const res = await fetch("https://bro-project.onrender.com/chat", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: [{ role: "user", content: currentMsg }] }),
+        headers: { 
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({ 
+          messages: [{ role: "user", content: currentMsg }] 
+        }),
       });
+
+      // Έλεγχος αν το response είναι όντως σωστό
+      if (!res.ok) {
+        const err = await res.json();
+        console.error("Backend Validation Error:", err);
+        setReply("Σφάλμα συστήματος: Το μήνυμα δεν στάλθηκε σωστά.");
+        return;
+      }
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
@@ -37,18 +49,13 @@ export default function ChatBot() {
         const { done, value } = await reader.read();
         if (done) break;
         
-        const chunk = decoder.decode(value, { stream: true });
-        
-        // Αντί για loop με delay που "παγώνει" το UI, προσθέτουμε το κομμάτι άμεσα
-        // και η αίσθηση του αργού streaming γίνεται από το backend ή οπτικά
-        fullReply += chunk;
+        fullReply += decoder.decode(value, { stream: true });
         setReply(fullReply);
-        
-        // Μικρό pause για να φαίνεται ομαλό
         await new Promise(resolve => setTimeout(resolve, 15));
       }
     } catch (error) {
-      setReply("Σφάλμα σύνδεσης. Παρακαλώ δοκιμάστε ξανά.");
+      console.error("Fetch Error:", error);
+      setReply("Σφάλμα σύνδεσης. Παρακαλώ ελέγξτε τη σύνδεσή σας.");
     }
   };
 
@@ -64,7 +71,6 @@ export default function ChatBot() {
       ) : (
         <div className="bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] w-[380px] h-[500px] flex flex-col border border-slate-100 overflow-hidden animate-in slide-in-from-bottom-10 duration-500">
           
-          {/* Header */}
           <div className="bg-slate-900 p-5 text-white flex justify-between items-center shadow-md">
             <div className="flex items-center gap-3">
               <div className="bg-cyan-500 p-2 rounded-lg"><FontAwesomeIcon icon={faRobot} /></div>
@@ -75,8 +81,7 @@ export default function ChatBot() {
             </button>
           </div>
           
-          {/* Messages Container */}
-          <div ref={scrollRef} className="flex-1 p-6 overflow-y-auto bg-white text-slate-700 leading-relaxed prose prose-sm max-w-none">
+          <div ref={scrollRef} className="flex-1 p-6 overflow-y-auto bg-white text-slate-700 leading-relaxed whitespace-pre-wrap">
             {reply ? (
               <div className="animate-in fade-in duration-700">{reply}</div>
             ) : (
@@ -84,7 +89,6 @@ export default function ChatBot() {
             )}
           </div>
           
-          {/* Input Area */}
           <div className="p-4 bg-slate-50 border-t border-slate-200">
             <div className="flex gap-2 bg-white p-1 rounded-xl border border-slate-200 focus-within:ring-2 focus-within:ring-cyan-500 transition">
               <input 
