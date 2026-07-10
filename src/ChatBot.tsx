@@ -1,36 +1,36 @@
-import { useState, useRef, useEffect } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faComments, faPaperPlane, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { useState } from "react";
 
 export default function ChatBot() {
   const [isOpen, setIsOpen] = useState(false);
-  const [msg, setMsg] = useState("");
-  const [messages, setMessages] = useState([{ role: "assistant", content: "Γεια! Πώς μπορώ να βοηθήσω;" }]);
+  const [messages, setMessages] = useState(["Γεια! Πώς μπορώ να βοηθήσω;"]);
+  const [input, setInput] = useState("");
 
-  const sendMessage = () => {
-    if (!msg.trim()) return;
-    setMessages([...messages, { role: "user", content: msg }]);
-    setMsg("");
+  const handleSend = () => {
+    if (input.trim() !== "") {
+      setMessages([...messages, input]);
+      setInput("");
+    }
   };
 
   return (
-    <div style={{ position: "fixed", bottom: "30px", right: "30px", zIndex: 9999 }}>
+    <div style={{ position: "fixed", bottom: "20px", right: "20px", zIndex: 9999 }}>
       {!isOpen ? (
-        <button onClick={() => setIsOpen(true)} style={{ width: "60px", height: "60px", borderRadius: "50%", background: "#0f172a", color: "white", border: "none", cursor: "pointer" }}>
-          <FontAwesomeIcon icon={faComments} />
+        <button onClick={() => setIsOpen(true)} style={{ padding: "15px", borderRadius: "50%", background: "black", color: "white" }}>
+          Chat
         </button>
       ) : (
-        <div style={{ width: "300px", height: "400px", background: "white", borderRadius: "15px", display: "flex", flexDirection: "column", border: "1px solid #ccc", overflow: "hidden" }}>
-          <div style={{ background: "#0f172a", color: "white", padding: "10px", display: "flex", justifyContent: "space-between" }}>
-            <span>AI Assistant</span>
-            <button onClick={() => setIsOpen(false)} style={{ background: "none", border: "none", color: "white", cursor: "pointer" }}><FontAwesomeIcon icon={faXmark} /></button>
-          </div>
+        <div style={{ width: "250px", height: "300px", background: "white", border: "1px solid black", display: "flex", flexDirection: "column" }}>
           <div style={{ flex: 1, padding: "10px", overflowY: "auto" }}>
-            {messages.map((m, i) => <div key={i} style={{ marginBottom: "10px" }}>{m.content}</div>)}
+            {messages.map((m, i) => <div key={i}>{m}</div>)}
           </div>
-          <div style={{ padding: "10px", borderTop: "1px solid #eee", display: "flex", gap: "5px" }}>
-            <input value={msg} onChange={(e) => setMsg(e.target.value)} placeholder="Γράψε μήνυμα..." style={{ flex: 1 }} />
-            <button onClick={sendMessage}><FontAwesomeIcon icon={faPaperPlane} /></button>
+          <div style={{ display: "flex", borderTop: "1px solid #ccc" }}>
+            <input 
+              value={input} 
+              onChange={(e) => setInput(e.target.value)} 
+              placeholder="Γράψε εδώ..." 
+              style={{ flex: 1 }}
+            />
+            <button onClick={handleSend}>Αποστολή</button>
           </div>
         </div>
       )}
