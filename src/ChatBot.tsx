@@ -11,7 +11,7 @@ export default function ChatBot() {
     if (!msg.trim()) return;
     
     const currentMsg = msg;
-    setReply("Σκέφτομαι...");
+    setReply(""); // Καθαρίζουμε για να εμφανιστεί το stream
     setMsg("");
 
     const API_URL = "https://bro-project.onrender.com";
@@ -22,16 +22,28 @@ export default function ChatBot() {
         headers: { 
           "Content-Type": "application/json" 
         },
-        // Εδώ χρησιμοποιούμε "messages" όπως ζητάει το backend σου
-        body: JSON.stringify({ messages: currentMsg }),
+        // ΔΙΟΡΘΩΣΗ: Στέλνουμε το messages ως array με objects
+        body: JSON.stringify({ 
+          messages: [{ role: "user", content: currentMsg }] 
+        }),
       });
 
-      if (!res.ok) {
-        throw new Error(`Server responded with ${res.status}`);
+      if (!res.ok) throw new Error("Σφάλμα σύνδεσης");
+
+      // ΔΙΑΧΕΙΡΙΣΗ STREAMING
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let fullReply = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        const chunk = decoder.decode(value, { stream: true });
+        fullReply += chunk;
+        setReply(fullReply); // Ενημερώνουμε το UI σταδιακά
       }
 
-      const data = await res.json();
-      setReply(data.response || "Δεν έλαβα απάντηση από τον server.");
     } catch (error) {
       console.error("ChatBot Error:", error);
       setReply("Σφάλμα σύνδεσης. Δοκίμασε ξανά σε λίγο.");
@@ -59,8 +71,8 @@ export default function ChatBot() {
             </button>
           </div>
           
-          <div className="bg-slate-50 p-4 rounded-lg mb-4 h-32 overflow-y-auto text-sm text-slate-700 border border-slate-100">
-            {reply}
+          <div className="bg-slate-50 p-4 rounded-lg mb-4 h-32 overflow-y-auto text-sm text-slate-700 border border-slate-100 whitespace-pre-wrap">
+            {reply || "..."}
           </div>
           
           <div className="flex gap-2">
